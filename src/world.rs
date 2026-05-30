@@ -1,4 +1,5 @@
 use crate::boid;
+use crate::context;
 
 pub struct World {
     pub boids: Vec<boid::Boid>,
@@ -6,7 +7,7 @@ pub struct World {
     height: i32,
 }
 
-pub fn init(width: i32, height: i32) -> World {
+pub fn init(ctx: &context::Context) -> World {
     let boid_singleton = vec![boid::Boid {
         x: 12,
         y: 12,
@@ -16,8 +17,8 @@ pub fn init(width: i32, height: i32) -> World {
 
     return World {
         boids: boid_singleton,
-        width,
-        height,
+        width: ctx.width,
+        height: ctx.height,
     };
 }
 

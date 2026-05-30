@@ -1,16 +1,15 @@
 use raylib::prelude::{Color, RaylibDraw};
 
 mod boid;
+mod context;
 mod world;
 
 fn main() {
     println!("Hello, world!");
+    let ctx = context::new();
+    let mut world = world::init(&ctx);
 
-    let width = 640;
-    let height = 480;
-    let mut world = world::init(width, height);
-
-    let (mut rl, thread) = raylib::init().size(width, height).build();
+    let (mut rl, thread) = raylib::init().size(ctx.width, ctx.height).build();
 
     rl.set_target_fps(60);
 
@@ -23,6 +22,6 @@ fn main() {
         world
             .boids
             .iter()
-            .for_each(|b| draw.draw_circle(b.x, b.y, 20.0, Color::BLACK));
+            .for_each(|b| draw.draw_circle(b.x, b.y, 20.0, Color::PURPLE));
     }
 }
