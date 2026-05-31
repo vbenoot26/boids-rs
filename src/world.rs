@@ -30,10 +30,10 @@ impl World {
         }
     }
 
-    fn find_neighbours(&self, boid: &boid::Boid) -> Vec<&boid::Boid> {
+    fn find_neighbours(&self, boid: &boid::Boid, dist: f32) -> Vec<&boid::Boid> {
         self.boids
             .iter()
-            .filter(|b| b.get_distance(boid) < (self.ctx.viewing_distance))
+            .filter(|b| b.get_distance(boid) < dist)
             .collect()
     }
 }
