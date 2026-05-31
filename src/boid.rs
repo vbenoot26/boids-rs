@@ -11,4 +11,9 @@ impl Boid {
         self.x += self.speedx;
         self.y += self.speedy;
     }
+
+    pub fn get_distance(&self, other: &Boid) -> f32 {
+        return (((self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y))
+            as f32).sqrt();
+    }
 }

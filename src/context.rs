@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Context {
     pub viewing_distance: i32,
     pub width: i32,

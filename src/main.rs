@@ -7,7 +7,7 @@ mod world;
 fn main() {
     println!("Hello, world!");
     let ctx = context::new();
-    let mut world = world::init(&ctx);
+    let mut world = world::init(ctx.clone());
 
     let (mut rl, thread) = raylib::init().size(ctx.width, ctx.height).build();
 

@@ -5,9 +5,11 @@ pub struct World {
     pub boids: Vec<boid::Boid>,
     width: i32,
     height: i32,
+
+    ctx: context::Context,
 }
 
-pub fn init(ctx: &context::Context) -> World {
+pub fn init(ctx: context::Context) -> World {
     let boid_singleton = vec![boid::Boid {
         x: 12,
         y: 12,
@@ -19,6 +21,7 @@ pub fn init(ctx: &context::Context) -> World {
         boids: boid_singleton,
         width: ctx.width,
         height: ctx.height,
+        ctx: ctx,
     };
 }
 
