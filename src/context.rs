@@ -8,18 +8,21 @@ pub struct Context {
     pub avoid_factor: f32,
     pub centering_factor: f32,
     pub matching_factor: f32,
+
+    pub boid_amount: usize,
 }
 
 impl Default for Context {
     fn default() -> Context {
         Context {
-            viewing_distance: 25.0,
-            close_distance: 5.0,
+            viewing_distance: 100.0,
+            close_distance: 30.0,
             width: 640,
             height: 480,
             avoid_factor: 0.05,
             centering_factor: 0.0005,
             matching_factor: 0.05,
+            boid_amount: 2,
         }
     }
 }

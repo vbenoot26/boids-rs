@@ -1,5 +1,5 @@
-use crate::boid;
 use crate::boid::Forces;
+use crate::boid::{self, Boid};
 use crate::context;
 
 pub struct World {
@@ -11,10 +11,10 @@ pub struct World {
 }
 
 pub fn init(ctx: context::Context) -> World {
-    let boid_singleton = vec![boid::Boid::default()];
+    let boids: Vec<Boid> = (0..ctx.boid_amount).map(|_| boid::new(&ctx)).collect();
 
     return World {
-        boids: boid_singleton,
+        boids: boids,
         width: ctx.width,
         height: ctx.height,
         ctx: ctx,

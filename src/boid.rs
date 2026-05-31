@@ -1,4 +1,5 @@
 use crate::context::Context;
+use rand::RngExt;
 
 pub struct Boid {
     pub x: f32,
@@ -30,6 +31,16 @@ impl Default for Boid {
             speedx: 10.0,
             speedy: 10.0,
         }
+    }
+}
+
+pub fn new(ctx: &Context) -> Boid {
+    let mut rng = rand::rng();
+    Boid {
+        x: rng.random::<f32>() * (ctx.width as f32),
+        y: rng.random::<f32>() * (ctx.height as f32),
+        speedx: rng.random::<f32>() * 10.0,
+        speedy: rng.random::<f32>() * 10.0,
     }
 }
 
