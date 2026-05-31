@@ -4,6 +4,9 @@ pub struct Boid {
 
     pub speedx: i32,
     pub speedy: i32,
+
+    close_dx: i32,
+    close_dy: i32,
 }
 
 impl Boid {
@@ -17,15 +20,12 @@ impl Boid {
             as f32).sqrt();
     }
 
-    pub fn apply_separation(mut self, neighbours: Vec<&Boid>, factor: i32) {
-        let mut dx = 0;
-        let mut dy = 0;
+    pub fn calc_separation(mut self, neighbours: Vec<&Boid>) {
+        self.close_dx = 0;
+        self.close_dy = 0;
         for boid in neighbours {
-            dx += self.x - boid.x;
-            dy += self.y - boid.y;
+            self.close_dx += self.x - boid.x;
+            self.close_dy += self.y - boid.y;
         }
-
-        self.speedx += factor * dx;
-        self.speedy += factor * dy;
     }
 }
