@@ -25,15 +25,15 @@ impl World {
         for b in &mut self.boids {
             b.step();
 
-            b.x = b.x.rem_euclid(self.width);
-            b.y = b.y.rem_euclid(self.height);
+            b.x = b.x.rem_euclid(self.width as f32);
+            b.y = b.y.rem_euclid(self.height as f32);
         }
     }
 
     fn find_neighbours(&self, boid: &boid::Boid) -> Vec<&boid::Boid> {
         self.boids
             .iter()
-            .filter(|b| b.get_distance(boid) < (self.ctx.viewing_distance as f32))
+            .filter(|b| b.get_distance(boid) < (self.ctx.viewing_distance))
             .collect()
     }
 }

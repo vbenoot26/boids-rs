@@ -22,6 +22,6 @@ fn main() {
         world
             .boids
             .iter()
-            .for_each(|b| draw.draw_circle(b.x, b.y, 20.0, Color::PURPLE));
+            .for_each(|b| draw.draw_circle(b.x as i32, b.y as i32, 20.0, Color::PURPLE));
     }
 }

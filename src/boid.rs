@@ -1,6 +1,6 @@
 pub struct Boid {
-    pub x: i32,
-    pub y: i32,
+    pub x: f32,
+    pub y: f32,
 
     pub speedx: f32,
     pub speedy: f32,
@@ -30,8 +30,8 @@ impl Default for Boid {
             ypos_avg: 0.0,
         };
         Boid {
-            x: 20,
-            y: 20,
+            x: 20.0,
+            y: 20.0,
             speedx: 10.0,
             speedy: 10.0,
             forces: forces,
@@ -41,8 +41,8 @@ impl Default for Boid {
 
 impl Boid {
     pub fn step(&mut self) {
-        self.x += self.speedx as i32;
-        self.y += self.speedy as i32;
+        self.x += self.speedx;
+        self.y += self.speedy;
     }
 
     pub fn get_distance(&self, other: &Boid) -> f32 {
@@ -51,16 +51,8 @@ impl Boid {
     }
 
     pub fn calc_separation(&mut self, neighbours: &[&Boid]) {
-        self.forces.close_dx = neighbours
-            .iter()
-            .map(|b| self.x - b.x)
-            .map(|b| b as f32)
-            .sum();
-        self.forces.close_dy = neighbours
-            .iter()
-            .map(|b| self.y - b.y)
-            .map(|b| b as f32)
-            .sum();
+        self.forces.close_dx = neighbours.iter().map(|b| self.x - b.x).sum();
+        self.forces.close_dy = neighbours.iter().map(|b| self.y - b.y).sum();
     }
 
     pub fn calc_alignment(&mut self, neighbours: &[&Boid]) {
@@ -85,17 +77,9 @@ impl Boid {
             return;
         }
 
-        self.forces.xpos_avg = neighbours
-            .iter()
-            .map(|b| b.x)
-            .map(|x| x as f32)
-            .sum::<f32>()
-            / (neighbours.len() as f32);
-        self.forces.ypos_avg = neighbours
-            .iter()
-            .map(|b| b.y)
-            .map(|y| y as f32)
-            .sum::<f32>()
-            / (neighbours.len() as f32);
+        self.forces.xpos_avg =
+            neighbours.iter().map(|b| b.x).sum::<f32>() / (neighbours.len() as f32);
+        self.forces.ypos_avg =
+            neighbours.iter().map(|b| b.y).sum::<f32>() / (neighbours.len() as f32);
     }
 }
