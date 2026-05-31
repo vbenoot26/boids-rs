@@ -18,10 +18,10 @@ fn main() {
 
         let mut draw = rl.begin_drawing(&thread);
 
-        draw.clear_background(Color::WHITE);
+        draw.clear_background(Color::BLACK);
         world
             .boids
             .iter()
-            .for_each(|b| draw.draw_circle(b.x as i32, b.y as i32, 20.0, Color::PURPLE));
+            .for_each(|b| draw.draw_circle(b.x as i32, b.y as i32, 2.0, Color::PURPLE));
     }
 }

@@ -15,14 +15,14 @@ pub struct Context {
 impl Default for Context {
     fn default() -> Context {
         Context {
-            viewing_distance: 100.0,
-            close_distance: 30.0,
-            width: 640,
-            height: 480,
+            viewing_distance: 20.0,
+            close_distance: 5.0,
+            width: 1000,
+            height: 1000,
             avoid_factor: 0.05,
             centering_factor: 0.0005,
             matching_factor: 0.05,
-            boid_amount: 2,
+            boid_amount: 2000,
         }
     }
 }
