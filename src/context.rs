@@ -4,6 +4,10 @@ pub struct Context {
     pub close_distance: f32,
     pub width: i32,
     pub height: i32,
+
+    pub avoid_factor: f32,
+    pub centering_factor: f32,
+    pub matching_factor: f32,
 }
 
 impl Default for Context {
@@ -13,6 +17,9 @@ impl Default for Context {
             close_distance: 5.0,
             width: 640,
             height: 480,
+            avoid_factor: 0.05,
+            centering_factor: 0.0005,
+            matching_factor: 0.05,
         }
     }
 }

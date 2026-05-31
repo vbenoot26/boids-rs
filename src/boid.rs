@@ -1,3 +1,5 @@
+use crate::context::Context;
+
 pub struct Boid {
     pub x: f32,
     pub y: f32,
@@ -32,9 +34,30 @@ impl Default for Boid {
 }
 
 impl Boid {
-    pub fn step(&mut self, forces: &Forces) {
+    pub fn step(&mut self, ctx: &Context, forces: &Forces) {
+        let (speedx, speedy) = self.calc_speeds(ctx, forces);
+        self.speedx = speedx;
+        self.speedy = speedy;
+
         self.x += self.speedx;
         self.y += self.speedy;
+    }
+
+    fn calc_speeds(&self, ctx: &Context, forces: &Forces) -> (f32, f32) {
+        let mut new_speedx = self.speedx + forces.sepx * ctx.avoid_factor;
+        let mut new_speedy = self.speedy + forces.sepy * ctx.avoid_factor;
+
+        if forces.neighbour_amount == 0 {
+            return (new_speedx, new_speedy);
+        }
+
+        new_speedx += (forces.xpos_avg - self.x) * ctx.centering_factor;
+        new_speedy += (forces.ypos_avg - self.y) * ctx.centering_factor;
+
+        new_speedx += (forces.xspeed_avg - self.speedx) * ctx.matching_factor;
+        new_speedy += (forces.yspeed_avg - self.speedy) * ctx.matching_factor;
+
+        (new_speedx, new_speedy)
     }
 
     pub fn get_distance(&self, other: &Boid) -> f32 {
