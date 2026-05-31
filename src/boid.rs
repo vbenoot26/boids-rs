@@ -4,43 +4,33 @@ pub struct Boid {
 
     pub speedx: f32,
     pub speedy: f32,
-
-    forces: Forces,
 }
 
-struct Forces {
-    close_dx: f32,
-    close_dy: f32,
+#[derive(Default, Clone)]
+pub struct Forces {
+    pub sepx: f32,
+    pub sepy: f32,
 
-    xspeed_avg: f32,
-    yspeed_avg: f32,
+    pub xspeed_avg: f32,
+    pub yspeed_avg: f32,
 
-    xpos_avg: f32,
-    ypos_avg: f32,
+    pub xpos_avg: f32,
+    pub ypos_avg: f32,
 }
 
 impl Default for Boid {
     fn default() -> Boid {
-        let forces = Forces {
-            close_dx: 0.0,
-            close_dy: 0.0,
-            xspeed_avg: 0.0,
-            yspeed_avg: 0.0,
-            xpos_avg: 0.0,
-            ypos_avg: 0.0,
-        };
         Boid {
             x: 20.0,
             y: 20.0,
             speedx: 10.0,
             speedy: 10.0,
-            forces: forces,
         }
     }
 }
 
 impl Boid {
-    pub fn step(&mut self) {
+    pub fn step(&mut self, forces: &Forces) {
         self.x += self.speedx;
         self.y += self.speedy;
     }
@@ -50,36 +40,32 @@ impl Boid {
             as f32).sqrt();
     }
 
-    pub fn calc_separation(&mut self, neighbours: &[&Boid]) {
-        self.forces.close_dx = neighbours.iter().map(|b| self.x - b.x).sum();
-        self.forces.close_dy = neighbours.iter().map(|b| self.y - b.y).sum();
+    pub fn calc_separation(&self, neighbours: &[&Boid]) -> (f32, f32) {
+        (
+            neighbours.iter().map(|b| self.x - b.x).sum(),
+            neighbours.iter().map(|b| self.y - b.y).sum(),
+        )
     }
 
-    pub fn calc_alignment(&mut self, neighbours: &[&Boid]) {
-        self.forces.xspeed_avg = 0.0;
-        self.forces.yspeed_avg = 0.0;
-
+    pub fn calc_alignment(&self, neighbours: &[&Boid]) -> (f32, f32) {
         if neighbours.len() == 0 {
-            return;
+            return (0.0, 0.0);
         }
 
-        self.forces.xspeed_avg =
-            neighbours.iter().map(|b| b.speedx).sum::<f32>() / (neighbours.len() as f32);
-        self.forces.yspeed_avg =
-            neighbours.iter().map(|b| b.speedy).sum::<f32>() / (neighbours.len() as f32);
+        (
+            neighbours.iter().map(|b| b.speedx).sum::<f32>() / (neighbours.len() as f32),
+            neighbours.iter().map(|b| b.speedy).sum::<f32>() / (neighbours.len() as f32),
+        )
     }
 
-    pub fn calc_cohesion(&mut self, neighbours: &[&Boid]) {
-        self.forces.xpos_avg = 0.0;
-        self.forces.ypos_avg = 0.0;
-
+    pub fn calc_cohesion(&self, neighbours: &[&Boid]) -> (f32, f32) {
         if neighbours.len() == 0 {
-            return;
+            return (0.0, 0.0);
         }
 
-        self.forces.xpos_avg =
-            neighbours.iter().map(|b| b.x).sum::<f32>() / (neighbours.len() as f32);
-        self.forces.ypos_avg =
-            neighbours.iter().map(|b| b.y).sum::<f32>() / (neighbours.len() as f32);
+        (
+            neighbours.iter().map(|b| b.x).sum::<f32>() / (neighbours.len() as f32),
+            neighbours.iter().map(|b| b.y).sum::<f32>() / (neighbours.len() as f32),
+        )
     }
 }

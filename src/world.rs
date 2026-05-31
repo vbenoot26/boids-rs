@@ -1,4 +1,5 @@
 use crate::boid;
+use crate::boid::Forces;
 use crate::context;
 
 pub struct World {
@@ -22,8 +23,28 @@ pub fn init(ctx: context::Context) -> World {
 
 impl World {
     pub fn step(&mut self) {
-        for b in &mut self.boids {
-            b.step();
+        let mut forces = vec![Forces::default(); self.boids.len()];
+
+        for (i, b) in self.boids.iter().enumerate() {
+            let too_close = self.find_neighbours(b, self.ctx.close_distance);
+            let neighbours = self.find_neighbours(b, self.ctx.viewing_distance);
+
+            let (sep_x, sep_y) = b.calc_separation(&too_close[..]);
+            let (align_x, align_y) = b.calc_alignment(&neighbours[..]);
+            let (coh_x, coh_y) = b.calc_cohesion(&neighbours[..]);
+
+            forces[i] = Forces {
+                sepx: sep_x,
+                sepy: sep_y,
+                xspeed_avg: align_x,
+                yspeed_avg: align_y,
+                xpos_avg: coh_x,
+                ypos_avg: coh_y,
+            };
+        }
+
+        for (i, b) in self.boids.iter_mut().enumerate() {
+            b.step(&forces[i]);
 
             b.x = b.x.rem_euclid(self.width as f32);
             b.y = b.y.rem_euclid(self.height as f32);
@@ -33,7 +54,10 @@ impl World {
     fn find_neighbours(&self, boid: &boid::Boid, dist: f32) -> Vec<&boid::Boid> {
         self.boids
             .iter()
-            .filter(|b| b.get_distance(boid) < dist)
+            .filter(|b| {
+                let bdist = b.get_distance(boid);
+                bdist < dist && bdist > 0.0
+            })
             .collect()
     }
 }
