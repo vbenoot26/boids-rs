@@ -10,12 +10,7 @@ pub struct World {
 }
 
 pub fn init(ctx: context::Context) -> World {
-    let boid_singleton = vec![boid::Boid {
-        x: 12,
-        y: 12,
-        speedx: 10,
-        speedy: 5,
-    }];
+    let boid_singleton = vec![boid::Boid::default()];
 
     return World {
         boids: boid_singleton,
@@ -28,8 +23,7 @@ pub fn init(ctx: context::Context) -> World {
 impl World {
     pub fn step(&mut self) {
         for b in &mut self.boids {
-            b.x += b.speedx;
-            b.y += b.speedy;
+            b.step();
 
             b.x = b.x.rem_euclid(self.width);
             b.y = b.y.rem_euclid(self.height);

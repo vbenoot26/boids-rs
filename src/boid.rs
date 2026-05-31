@@ -12,6 +12,21 @@ pub struct Boid {
     yspeed_avg: f32,
 }
 
+impl Default for Boid {
+    fn default() -> Boid {
+        Boid {
+            x: 20,
+            y: 20,
+            speedx: 10.0,
+            speedy: 10.0,
+            close_dx: 0.0,
+            close_dy: 0.0,
+            xspeed_avg: 0.0,
+            yspeed_avg: 0.0,
+        }
+    }
+}
+
 impl Boid {
     pub fn step(&mut self) {
         self.x += self.speedx as i32;
