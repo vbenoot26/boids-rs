@@ -23,7 +23,7 @@ impl Boid {
             as f32).sqrt();
     }
 
-    pub fn calc_separation(mut self, neighbours: Vec<&Boid>) {
+    pub fn calc_separation(&mut self, neighbours: &[&Boid]) {
         self.close_dx = 0.0;
         self.close_dy = 0.0;
         for boid in neighbours {
@@ -32,7 +32,7 @@ impl Boid {
         }
     }
 
-    pub fn calc_alignment(mut self, neighbours: Vec<&Boid>) {
+    pub fn calc_alignment(&mut self, neighbours: &[&Boid]) {
         self.xspeed_avg = 0.0;
         self.yspeed_avg = 0.0;
 
