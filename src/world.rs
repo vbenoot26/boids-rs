@@ -23,7 +23,7 @@ pub fn init(ctx: context::Context) -> World {
 
 impl World {
     pub fn step(&mut self) {
-        let mut forces = vec![Forces::default(); self.boids.len()];
+        let mut forces = Vec::with_capacity(self.boids.len());
 
         for (i, b) in self.boids.iter().enumerate() {
             let too_close = self.find_neighbours(b, self.ctx.close_distance);
@@ -40,6 +40,7 @@ impl World {
                 yspeed_avg: align_y,
                 xpos_avg: coh_x,
                 ypos_avg: coh_y,
+                neighbour_amount: neighbours.len(),
             };
         }
 

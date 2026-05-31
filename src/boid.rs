@@ -16,6 +16,8 @@ pub struct Forces {
 
     pub xpos_avg: f32,
     pub ypos_avg: f32,
+
+    pub neighbour_amount: usize,
 }
 
 impl Default for Boid {
