@@ -10,6 +10,9 @@ pub struct Boid {
 
     xspeed_avg: f32,
     yspeed_avg: f32,
+
+    xpos_avg: f32,
+    ypos_avg: f32,
 }
 
 impl Default for Boid {
@@ -23,6 +26,8 @@ impl Default for Boid {
             close_dy: 0.0,
             xspeed_avg: 0.0,
             yspeed_avg: 0.0,
+            xpos_avg: 0.0,
+            ypos_avg: 0.0,
         }
     }
 }
@@ -64,5 +69,24 @@ impl Boid {
 
         self.xspeed_avg /= len as f32;
         self.yspeed_avg /= len as f32;
+    }
+
+    pub fn calc_cohesion(&mut self, neighbours: &[&Boid]) {
+        self.xpos_avg = 0.0;
+        self.ypos_avg = 0.0;
+
+        let len = neighbours.len();
+
+        if len == 0 {
+            return;
+        }
+
+        for boid in neighbours {
+            self.xpos_avg += boid.x as f32;
+            self.ypos_avg += boid.y as f32;
+        }
+
+        self.xpos_avg /= len as f32;
+        self.ypos_avg /= len as f32;
     }
 }
