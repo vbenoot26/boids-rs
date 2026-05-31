@@ -5,10 +5,12 @@ pub struct Context {
     pub height: i32,
 }
 
-pub fn new() -> Context {
-    return Context {
-        viewing_distance: 25,
-        width: 640,
-        height: 480,
-    };
+impl Default for Context {
+    fn default() -> Context {
+        Context {
+            viewing_distance: 25,
+            width: 640,
+            height: 480,
+        }
+    }
 }
