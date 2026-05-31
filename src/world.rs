@@ -35,4 +35,11 @@ impl World {
             b.y = b.y.rem_euclid(self.height);
         }
     }
+
+    fn find_neighbours(&self, boid: &boid::Boid) -> Vec<&boid::Boid> {
+        self.boids
+            .iter()
+            .filter(|b| b.get_distance(boid) < (self.ctx.viewing_distance as f32))
+            .collect()
+    }
 }
