@@ -5,7 +5,6 @@ mod context;
 mod world;
 
 fn main() {
-    println!("Hello, world!");
     let ctx = context::Context::default();
     let mut world = world::init(ctx.clone());
 

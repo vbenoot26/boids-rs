@@ -23,26 +23,28 @@ pub fn init(ctx: context::Context) -> World {
 
 impl World {
     pub fn step(&mut self) {
-        let mut forces = vec![Forces::default(); self.boids.len()];
+        let forces: Vec<Forces> = self
+            .boids
+            .iter()
+            .map(|b| {
+                let too_close = self.find_neighbours(b, self.ctx.close_distance);
+                let neighbours = self.find_neighbours(b, self.ctx.viewing_distance);
 
-        for (i, b) in self.boids.iter().enumerate() {
-            let too_close = self.find_neighbours(b, self.ctx.close_distance);
-            let neighbours = self.find_neighbours(b, self.ctx.viewing_distance);
+                let (sep_x, sep_y) = b.calc_separation(&too_close[..]);
+                let (align_x, align_y) = b.calc_alignment(&neighbours[..]);
+                let (coh_x, coh_y) = b.calc_cohesion(&neighbours[..]);
 
-            let (sep_x, sep_y) = b.calc_separation(&too_close[..]);
-            let (align_x, align_y) = b.calc_alignment(&neighbours[..]);
-            let (coh_x, coh_y) = b.calc_cohesion(&neighbours[..]);
-
-            forces[i] = Forces {
-                sepx: sep_x,
-                sepy: sep_y,
-                xspeed_avg: align_x,
-                yspeed_avg: align_y,
-                xpos_avg: coh_x,
-                ypos_avg: coh_y,
-                neighbour_amount: neighbours.len(),
-            };
-        }
+                Forces {
+                    sepx: sep_x,
+                    sepy: sep_y,
+                    xspeed_avg: align_x,
+                    yspeed_avg: align_y,
+                    xpos_avg: coh_x,
+                    ypos_avg: coh_y,
+                    neighbour_amount: neighbours.len(),
+                }
+            })
+            .collect();
 
         for (i, b) in self.boids.iter_mut().enumerate() {
             b.step(&self.ctx, &forces[i]);

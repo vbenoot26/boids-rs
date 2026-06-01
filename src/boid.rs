@@ -5,8 +5,8 @@ pub struct Boid {
     pub x: f32,
     pub y: f32,
 
-    pub speedx: f32,
-    pub speedy: f32,
+    speedx: f32,
+    speedy: f32,
 }
 
 #[derive(Default, Clone)]
@@ -23,24 +23,13 @@ pub struct Forces {
     pub neighbour_amount: usize,
 }
 
-impl Default for Boid {
-    fn default() -> Boid {
-        Boid {
-            x: 20.0,
-            y: 20.0,
-            speedx: 10.0,
-            speedy: 10.0,
-        }
-    }
-}
-
 pub fn new(ctx: &Context) -> Boid {
     let mut rng = rand::rng();
     Boid {
         x: rng.random::<f32>() * (ctx.width as f32),
         y: rng.random::<f32>() * (ctx.height as f32),
-        speedx: rng.random::<f32>() * 10.0,
-        speedy: rng.random::<f32>() * 10.0,
+        speedx: rng.random::<f32>() * 10.0 - 5.0,
+        speedy: rng.random::<f32>() * 10.0 - 5.0,
     }
 }
 
