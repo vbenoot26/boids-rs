@@ -10,6 +10,9 @@ pub struct Context {
     pub matching_factor: f32,
 
     pub boid_amount: usize,
+
+    pub min_speed: f32,
+    pub max_speed: f32,
 }
 
 impl Default for Context {
@@ -23,6 +26,8 @@ impl Default for Context {
             centering_factor: 0.0005,
             matching_factor: 0.05,
             boid_amount: 2000,
+            min_speed: 5.0,
+            max_speed: 10.0,
         }
     }
 }

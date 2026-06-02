@@ -1,5 +1,6 @@
 use crate::context::Context;
 use rand::RngExt;
+use std::cmp::{self, min};
 
 pub struct Boid {
     pub x: f32,
@@ -56,6 +57,22 @@ impl Boid {
 
         new_speedx += (forces.xspeed_avg - self.speedx) * ctx.matching_factor;
         new_speedy += (forces.yspeed_avg - self.speedy) * ctx.matching_factor;
+
+        let sqrd_speed = (new_speedx * new_speedx) + (new_speedy * new_speedy);
+
+        if sqrd_speed < ctx.min_speed * ctx.min_speed {
+            let factor = ((ctx.min_speed * ctx.min_speed) / sqrd_speed).sqrt();
+
+            new_speedx = factor * new_speedx;
+            new_speedy = factor * new_speedy;
+        }
+
+        if sqrd_speed > ctx.max_speed * ctx.max_speed {
+            let factor = ((ctx.max_speed * ctx.max_speed) / sqrd_speed).sqrt();
+
+            new_speedx = factor * new_speedx;
+            new_speedy = factor * new_speedy;
+        }
 
         (new_speedx, new_speedy)
     }
