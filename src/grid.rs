@@ -22,16 +22,14 @@ pub fn init(ctx: &Context) -> Grid {
     let rows = (ctx.height as f32 / width).ceil() as usize;
 
     let rects: Vec<Vec<Rectangle>> = (0..cols)
-        .map(|i| -> Vec<Rectangle> {
+        .map(|i| {
             (0..rows)
-                .map(|j| -> Rectangle {
-                    Rectangle {
-                        min_x: (i as i32) * width_pixels,
-                        max_x: ((i + 1) as i32) * width_pixels,
-                        min_y: (j as i32) * width_pixels,
-                        max_y: ((j + 1) as i32) * width_pixels,
-                        boids: Vec::with_capacity(ctx.boid_amount),
-                    }
+                .map(|j| Rectangle {
+                    min_x: (i as i32) * width_pixels,
+                    max_x: ((i + 1) as i32) * width_pixels,
+                    min_y: (j as i32) * width_pixels,
+                    max_y: ((j + 1) as i32) * width_pixels,
+                    boids: Vec::with_capacity(ctx.boid_amount),
                 })
                 .collect()
         })
@@ -44,7 +42,7 @@ pub fn init(ctx: &Context) -> Grid {
 }
 
 impl Grid {
-    pub fn distribute(&mut self, boids: &Vec<Boid>) {
+    pub fn distribute(&mut self, boids: &[Boid]) {
         self.clear();
 
         for (i, boid) in boids.iter().enumerate() {
