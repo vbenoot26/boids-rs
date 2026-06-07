@@ -23,7 +23,7 @@ fn main() {
         world
             .boids
             .iter()
-            .for_each(|b| draw.draw_circle(b.x as i32, b.y as i32, 2.0, Color::PURPLE));
+            .for_each(|b| draw.draw_pixel(b.x as i32, b.y as i32, Color::WHITE));
 
         draw.draw_text(&fps_text, 10, 10, 20, Color::WHITE);
     }
