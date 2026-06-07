@@ -33,19 +33,12 @@ impl World {
     pub fn step(&mut self) {
         self.grid.distribute(&self.boids);
 
-        let mut possible_neighbours_buf: Vec<BoidId> = Vec::with_capacity(self.boids.len());
-
         let forces: Vec<Forces> = self
             .boids
             .iter()
             .map(|b| {
-                let too_close =
-                    self.find_neighbours(b, self.ctx.close_distance, &mut possible_neighbours_buf);
-                let neighbours = self.find_neighbours(
-                    b,
-                    self.ctx.viewing_distance,
-                    &mut possible_neighbours_buf,
-                );
+                let too_close = self.find_neighbours(b, self.ctx.close_distance);
+                let neighbours = self.find_neighbours(b, self.ctx.viewing_distance);
 
                 let (sep_x, sep_y) = b.calc_separation(&too_close[..]);
                 let (align_x, align_y) = b.calc_alignment(&neighbours[..]);
@@ -71,16 +64,9 @@ impl World {
         }
     }
 
-    fn find_neighbours(
-        &self,
-        boid: &boid::Boid,
-        dist: f32,
-        possible_neighbours_buf: &mut Vec<BoidId>,
-    ) -> Vec<&boid::Boid> {
+    fn find_neighbours(&self, boid: &boid::Boid, dist: f32) -> Vec<&boid::Boid> {
         self.grid
-            .get_possible_neighbours(&boid, possible_neighbours_buf);
-        possible_neighbours_buf
-            .iter()
+            .get_possible_neighbours(&boid)
             .map(|id| &self.boids[id.0])
             .filter(|b| {
                 let bdist = b.get_distance(boid);

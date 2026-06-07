@@ -1,3 +1,5 @@
+use std::{collections::btree_set::Iter, iter::FlatMap};
+
 use crate::{boid::Boid, context::Context, world::BoidId};
 
 struct Rectangle {
@@ -61,7 +63,7 @@ impl Grid {
         )
     }
 
-    pub fn get_possible_neighbours(&self, boid: &Boid, result: &mut Vec<BoidId>) {
+    pub fn get_possible_neighbours(&self, boid: &Boid) -> impl Iterator<Item = BoidId> {
         let (col_center, row_center) = self.get_idx(boid);
 
         let col_min = col_center.saturating_sub(1);
@@ -70,12 +72,8 @@ impl Grid {
         let row_min = row_center.saturating_sub(1);
         let row_max = (row_center + 1).min(self.rectangles[0].len() - 1);
 
-        result.clear();
-
-        for col in col_min..=col_max {
-            for row in row_min..=row_max {
-                result.extend(self.rectangles[col][row].boids.iter().copied());
-            }
-        }
+        (col_min..=col_max).flat_map(move |c| {
+            (row_min..=row_max).flat_map(move |r| self.rectangles[c][r].boids.iter().copied())
+        })
     }
 }
