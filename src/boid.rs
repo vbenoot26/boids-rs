@@ -81,6 +81,65 @@ impl Boid {
             as f32).sqrt();
     }
 
+    pub fn calc_forces(
+        &self,
+        neighbours: impl Iterator<Item = &Boid>,
+        too_close: impl Iterator<Item = &Boid>,
+    ) -> Forces {
+        let forces_neighbours = neighbours.map(|b| Forces {
+            xspeed_avg: b.speedx,
+            yspeed_avg: b.speedy,
+
+            xpos_avg: b.x,
+            ypos_avg: b.y,
+
+            neighbour_amount: 1,
+
+            sepx: 0.0,
+            sepy: 0.0,
+        });
+
+        let forces_close = too_close.map(|b| Forces {
+            sepx: self.x - b.x,
+            sepy: self.y - b.y,
+
+            xspeed_avg: 0.0,
+            yspeed_avg: 0.0,
+            xpos_avg: 0.0,
+            ypos_avg: 0.0,
+            neighbour_amount: 0,
+        });
+
+        let forces = forces_neighbours.chain(forces_close).fold(
+            Forces {
+                sepx: 0.0,
+                sepy: 0.0,
+                xspeed_avg: 0.0,
+                yspeed_avg: 0.0,
+                xpos_avg: 0.0,
+                ypos_avg: 0.0,
+                neighbour_amount: 0,
+            },
+            |cum, force| Forces {
+                sepx: cum.sepx + force.sepx,
+                sepy: cum.sepy + force.sepy,
+                xspeed_avg: cum.xspeed_avg + force.xspeed_avg,
+                yspeed_avg: cum.yspeed_avg + force.yspeed_avg,
+                xpos_avg: cum.xpos_avg + force.xpos_avg,
+                ypos_avg: cum.ypos_avg + force.ypos_avg,
+                neighbour_amount: cum.neighbour_amount + force.neighbour_amount,
+            },
+        );
+
+        forces.xspeed_avg = forces.xspeed_avg / forces.neighbour_amount;
+        forces.yspeed_avg = forces.yspeed_avg / forces.neighbour_amount;
+
+        forces.xpos_avg = forces.xpos_avg / forces.neighbour_amount;
+        forces.ypos_avg = forces.ypos_avg / forces.neighbour_amount;
+
+        forces
+    }
+
     pub fn calc_separation(&self, neighbours: &[&Boid]) -> (f32, f32) {
         (
             neighbours.iter().map(|b| self.x - b.x).sum(),

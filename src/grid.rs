@@ -1,5 +1,3 @@
-use std::{collections::btree_set::Iter, iter::FlatMap};
-
 use crate::{boid::Boid, context::Context, world::BoidId};
 
 struct Rectangle {
