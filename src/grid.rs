@@ -1,11 +1,6 @@
 use crate::{boid::Boid, context::Context, world::BoidId};
 
 struct Rectangle {
-    min_x: i32,
-    max_x: i32,
-    min_y: i32,
-    max_y: i32,
-
     boids: Vec<BoidId>,
 }
 
@@ -22,13 +17,9 @@ pub fn init(ctx: &Context) -> Grid {
     let rows = (ctx.height as f32 / width).ceil() as usize;
 
     let rects: Vec<Vec<Rectangle>> = (0..cols)
-        .map(|i| {
+        .map(|_| {
             (0..rows)
-                .map(|j| Rectangle {
-                    min_x: (i as i32) * width_pixels,
-                    max_x: ((i + 1) as i32) * width_pixels,
-                    min_y: (j as i32) * width_pixels,
-                    max_y: ((j + 1) as i32) * width_pixels,
+                .map(|_| Rectangle {
                     boids: Vec::with_capacity(ctx.boid_amount),
                 })
                 .collect()
@@ -64,7 +55,10 @@ impl Grid {
         let col = (boid.x / self.width as f32).floor();
         let row = (boid.y / self.width as f32).floor();
 
-        (col as usize, row as usize)
+        (
+            (col as usize).min(self.rectangles.len() - 1),
+            (row as usize).min(self.rectangles[0].len() - 1),
+        )
     }
 
     pub fn get_possible_neighbours(&self, boid: &Boid, result: &mut Vec<BoidId>) {
