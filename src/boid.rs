@@ -1,6 +1,5 @@
 use crate::context::Context;
 use rand::RngExt;
-use std::cmp::{self, min};
 
 pub struct Boid {
     pub x: f32,
