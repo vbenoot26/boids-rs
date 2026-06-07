@@ -16,6 +16,7 @@ fn main() {
     while !rl.window_should_close() {
         world.step();
 
+        let fps_text = format!("FPS: {}", rl.get_fps());
         let mut draw = rl.begin_drawing(&thread);
 
         draw.clear_background(Color::BLACK);
@@ -23,5 +24,7 @@ fn main() {
             .boids
             .iter()
             .for_each(|b| draw.draw_circle(b.x as i32, b.y as i32, 2.0, Color::PURPLE));
+
+        draw.draw_text(&fps_text, 10, 10, 20, Color::WHITE);
     }
 }
