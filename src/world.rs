@@ -1,6 +1,7 @@
 use crate::boid::Forces;
 use crate::boid::{self, Boid};
-use crate::context;
+use crate::grid::Grid;
+use crate::{context, grid};
 
 #[derive(Copy, Clone)]
 pub struct BoidId(pub usize);
@@ -9,7 +10,7 @@ pub struct World {
     pub boids: Vec<boid::Boid>,
     width: i32,
     height: i32,
-
+    grid: Grid,
     ctx: context::Context,
 }
 
@@ -20,12 +21,15 @@ pub fn init(ctx: context::Context) -> World {
         boids: boids,
         width: ctx.width,
         height: ctx.height,
+        grid: grid::init(&ctx),
         ctx: ctx,
     };
 }
 
 impl World {
     pub fn step(&mut self) {
+        self.grid.distribute(&self.boids);
+
         let forces: Vec<Forces> = self
             .boids
             .iter()
@@ -58,8 +62,10 @@ impl World {
     }
 
     fn find_neighbours(&self, boid: &boid::Boid, dist: f32) -> Vec<&boid::Boid> {
-        self.boids
+        self.grid
+            .get_possible_neighbours(&boid)
             .iter()
+            .map(|id| &self.boids[id.0])
             .filter(|b| {
                 let bdist = b.get_distance(boid);
                 bdist < dist && bdist > 0.0

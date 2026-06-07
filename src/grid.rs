@@ -70,11 +70,11 @@ impl Grid {
     pub fn get_possible_neighbours(&self, boid: &Boid) -> Vec<BoidId> {
         let (col_center, row_center) = self.get_idx(boid);
 
-        let col_min = (col_center - 1).max(0);
-        let col_max = (col_center + 1).min(self.rectangles.len());
+        let col_min = col_center.saturating_sub(1);
+        let col_max = (col_center + 1).min(self.rectangles.len() - 1);
 
-        let row_min = (row_center - 1).max(0);
-        let row_max = (row_center + 1).min(self.rectangles[0].len());
+        let row_min = row_center.saturating_sub(1);
+        let row_max = (row_center + 1).min(self.rectangles[0].len() - 1);
 
         let mut result = Vec::new();
 
