@@ -2,6 +2,9 @@ use crate::boid::Forces;
 use crate::boid::{self, Boid};
 use crate::context;
 
+#[derive(Copy, Clone)]
+pub struct BoidId(usize);
+
 pub struct World {
     pub boids: Vec<boid::Boid>,
     width: i32,

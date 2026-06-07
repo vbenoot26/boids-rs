@@ -2,6 +2,7 @@ use raylib::prelude::{Color, RaylibDraw};
 
 mod boid;
 mod context;
+mod grid;
 mod world;
 
 fn main() {
