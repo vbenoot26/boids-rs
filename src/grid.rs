@@ -1,4 +1,4 @@
-use crate::{context::Context, world::BoidId};
+use crate::{boid::Boid, context::Context, world::BoidId};
 
 struct Rectangle {
     min_x: i32,
@@ -40,5 +40,32 @@ pub fn init(ctx: &Context) -> Grid {
     Grid {
         rectangles: rects,
         width: width_pixels,
+    }
+}
+
+impl Grid {
+    pub fn distribute(&mut self, boids: &Vec<Boid>) {
+        self.clear();
+
+        for (i, boid) in boids.iter().enumerate() {
+            let (col, row) = self.get_idx(boid);
+
+            self.rectangles[col][row].boids.push(BoidId(i));
+        }
+    }
+
+    fn clear(&mut self) {
+        for col in self.rectangles.iter_mut() {
+            for rect in col.iter_mut() {
+                rect.boids.clear();
+            }
+        }
+    }
+
+    fn get_idx(&self, boid: &Boid) -> (usize, usize) {
+        let col = (boid.x / self.width as f32).floor();
+        let row = (boid.y / self.width as f32).floor();
+
+        (col as usize, row as usize)
     }
 }
