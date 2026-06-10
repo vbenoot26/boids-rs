@@ -1,9 +1,5 @@
+use boids::{context, world};
 use raylib::prelude::{Color, RaylibDraw};
-
-mod boid;
-mod context;
-mod grid;
-mod world;
 
 fn main() {
     let ctx = context::Context::default();

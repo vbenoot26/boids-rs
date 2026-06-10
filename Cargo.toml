@@ -7,3 +7,10 @@ edition = "2024"
 flamegraph = "0.6.12"
 rand = "0.10.1"
 raylib = "5.5.1"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "bench"
+harness = false
