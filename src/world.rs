@@ -1,24 +1,9 @@
 use crate::boid::{self, Boid};
-use crate::context::Context;
 use crate::grid::Grid;
 use crate::{context, grid};
 
 #[derive(Copy, Clone)]
 pub struct BoidId(pub usize);
-
-#[derive(Default, Clone)]
-struct Forces {
-    pub sepx: f32,
-    pub sepy: f32,
-
-    pub xspeed_avg: f32,
-    pub yspeed_avg: f32,
-
-    pub xpos_avg: f32,
-    pub ypos_avg: f32,
-
-    pub neighbour_amount: usize,
-}
 
 pub struct World {
     pub boids: Vec<boid::Boid>,
@@ -44,29 +29,31 @@ impl World {
     pub fn step(&mut self) {
         self.grid.distribute(&self.boids);
 
-        let forces: Vec<Forces> = self
+        let speeds: Vec<(f32, f32)> = self
             .boids
             .iter()
             .map(|b| {
-                let (sepx, sepy) = self.get_separation_forces(b, self.ctx.close_distance);
-                let mut other_forces = self.get_neighbour_forces(b, self.ctx.viewing_distance);
+                let (sepx, sepy) = self.get_separation_speeds(b, self.ctx.close_distance);
+                let (neighbour_speedx, neighbour_speedy) =
+                    self.apply_neighbour_forces(b, self.ctx.viewing_distance);
 
-                other_forces.sepx = sepx;
-                other_forces.sepy = sepy;
-
-                other_forces
+                self.clamp_speeds(
+                    b.speedx + sepx + neighbour_speedx,
+                    b.speedy + sepy + neighbour_speedy,
+                )
             })
             .collect();
 
         for (i, b) in self.boids.iter_mut().enumerate() {
-            forces[i].apply_to(&self.ctx, b);
+            let (speedx, speedy) = speeds[i];
+            b.step(speedx, speedy);
 
             b.x = b.x.rem_euclid(self.width as f32);
             b.y = b.y.rem_euclid(self.height as f32);
         }
     }
 
-    fn get_neighbour_forces(&self, boid: &boid::Boid, dist: f32) -> Forces {
+    fn apply_neighbour_forces(&self, boid: &boid::Boid, dist: f32) -> (f32, f32) {
         let mut xspeed_cum = 0.0;
         let mut yspeed_cum = 0.0;
 
@@ -80,8 +67,8 @@ impl World {
             .get_possible_neighbours(&boid)
             .map(|id| &self.boids[id.0])
             .filter(|b| {
-                let bdist = b.get_distance(boid);
-                bdist < dist && bdist > 0.0
+                let bdist = b.get_distance_sqrd(boid);
+                bdist < dist * dist && bdist > 0.0
             })
         {
             xspeed_cum += b.speedx;
@@ -92,18 +79,26 @@ impl World {
             neighbour_count += 1;
         }
 
-        Forces {
-            sepx: 0.0,
-            sepy: 0.0,
-            xspeed_avg: xspeed_cum / neighbour_count as f32,
-            yspeed_avg: yspeed_cum / neighbour_count as f32,
-            xpos_avg: xpos_cum / neighbour_count as f32,
-            ypos_avg: ypos_cum / neighbour_count as f32,
-            neighbour_amount: neighbour_count,
+        if neighbour_count == 0 {
+            return (0.0, 0.0);
         }
+
+        let xpos_avg = xpos_cum / neighbour_count as f32;
+        let ypos_avg = ypos_cum / neighbour_count as f32;
+
+        let xspeed_avg = xspeed_cum / neighbour_count as f32;
+        let yspeed_avg = yspeed_cum / neighbour_count as f32;
+
+        let mut new_speedx = (xpos_avg - boid.x) * self.ctx.centering_factor;
+        let mut new_speedy = (ypos_avg - boid.y) * self.ctx.centering_factor;
+
+        new_speedx += (xspeed_avg - boid.speedx) * self.ctx.matching_factor;
+        new_speedy += (yspeed_avg - boid.speedy) * self.ctx.matching_factor;
+
+        (new_speedx, new_speedy)
     }
 
-    fn get_separation_forces(&self, boid: &boid::Boid, dist: f32) -> (f32, f32) {
+    fn get_separation_speeds(&self, boid: &boid::Boid, dist: f32) -> (f32, f32) {
         let (mut sepx, mut sepy) = (0.0, 0.0);
 
         for b in self
@@ -111,56 +106,36 @@ impl World {
             .get_possible_neighbours(boid)
             .map(|id| &self.boids[id.0])
             .filter(|b| {
-                let bdist = b.get_distance(boid);
-                bdist < dist && bdist > 0.0
+                let bdist = b.get_distance_sqrd(boid);
+                bdist < dist * dist && bdist > 0.0
             })
         {
             sepx += boid.x - b.x;
             sepy += boid.y - b.y;
         }
 
-        (sepx, sepy)
-    }
-}
-
-impl Forces {
-    fn apply_to(&self, ctx: &Context, boid: &mut Boid) {
-        let (speedx, speedy) = self.calc_speeds(ctx, boid);
-        boid.speedx = speedx;
-        boid.speedy = speedy;
-
-        boid.x += boid.speedx;
-        boid.y += boid.speedy;
+        let new_speedx = sepx * self.ctx.avoid_factor;
+        let new_speedy = sepy * self.ctx.avoid_factor;
+        (new_speedx, new_speedy)
     }
 
-    fn calc_speeds(&self, ctx: &Context, boid: &Boid) -> (f32, f32) {
-        let mut new_speedx = boid.speedx + self.sepx * ctx.avoid_factor;
-        let mut new_speedy = boid.speedy + self.sepy * ctx.avoid_factor;
+    fn clamp_speeds(&self, speedx: f32, speedy: f32) -> (f32, f32) {
+        let mut new_speedx = speedx;
+        let mut new_speedy = speedy;
+        let sqrd_speed = (speedx * speedx) + (speedy * speedy);
 
-        if self.neighbour_amount == 0 {
-            return (new_speedx, new_speedy);
+        if sqrd_speed < self.ctx.min_speed * self.ctx.min_speed {
+            let factor = ((self.ctx.min_speed * self.ctx.min_speed) / sqrd_speed).sqrt();
+
+            new_speedx = factor * speedx;
+            new_speedy = factor * speedy;
         }
 
-        new_speedx += (self.xpos_avg - boid.x) * ctx.centering_factor;
-        new_speedy += (self.ypos_avg - boid.y) * ctx.centering_factor;
+        if sqrd_speed > self.ctx.max_speed * self.ctx.max_speed {
+            let factor = ((self.ctx.max_speed * self.ctx.max_speed) / sqrd_speed).sqrt();
 
-        new_speedx += (self.xspeed_avg - boid.speedx) * ctx.matching_factor;
-        new_speedy += (self.yspeed_avg - boid.speedy) * ctx.matching_factor;
-
-        let sqrd_speed = (new_speedx * new_speedx) + (new_speedy * new_speedy);
-
-        if sqrd_speed < ctx.min_speed * ctx.min_speed {
-            let factor = ((ctx.min_speed * ctx.min_speed) / sqrd_speed).sqrt();
-
-            new_speedx = factor * new_speedx;
-            new_speedy = factor * new_speedy;
-        }
-
-        if sqrd_speed > ctx.max_speed * ctx.max_speed {
-            let factor = ((ctx.max_speed * ctx.max_speed) / sqrd_speed).sqrt();
-
-            new_speedx = factor * new_speedx;
-            new_speedy = factor * new_speedy;
+            new_speedx = factor * speedx;
+            new_speedy = factor * speedy;
         }
 
         (new_speedx, new_speedy)
