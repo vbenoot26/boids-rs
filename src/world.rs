@@ -33,14 +33,8 @@ impl World {
             .boids
             .iter()
             .map(|b| {
-                let (sepx, sepy) = self.get_separation_speeds(b, self.ctx.close_distance);
-                let (neighbour_speedx, neighbour_speedy) =
-                    self.apply_neighbour_forces(b, self.ctx.viewing_distance);
-
-                self.clamp_speeds(
-                    b.speedx + sepx + neighbour_speedx,
-                    b.speedy + sepy + neighbour_speedy,
-                )
+                let (new_speed_x, new_speed_y) = self.calc_new_speeds(b);
+                self.clamp_speeds(b.speedx + new_speed_x, b.speedy + new_speed_y)
             })
             .collect();
 
@@ -53,7 +47,13 @@ impl World {
         }
     }
 
-    fn apply_neighbour_forces(&self, boid: &boid::Boid, dist: f32) -> (f32, f32) {
+    fn calc_new_speeds(&self, boid: &boid::Boid) -> (f32, f32) {
+        let sep_dist = self.ctx.close_distance;
+        let view_dist = self.ctx.viewing_distance;
+
+        let mut sepx = 0.0;
+        let mut sepy = 0.0;
+
         let mut xspeed_cum = 0.0;
         let mut yspeed_cum = 0.0;
 
@@ -66,17 +66,27 @@ impl World {
             .grid
             .get_possible_neighbours(&boid)
             .map(|id| &self.boids[id.0])
-            .filter(|b| {
-                let bdist = b.get_distance_sqrd(boid);
-                bdist < dist * dist && bdist > 0.0
-            })
         {
+            let bdist = b.get_distance_sqrd(boid);
+
+            if bdist <= 0.0 {
+                continue;
+            }
+
+            if bdist >= view_dist * view_dist {
+                continue;
+            }
+
             xspeed_cum += b.speedx;
             yspeed_cum += b.speedy;
             xpos_cum += b.x;
             ypos_cum += b.y;
 
             neighbour_count += 1;
+            if bdist < sep_dist * sep_dist {
+                sepx += boid.x - b.x;
+                sepy += boid.y - b.y;
+            }
         }
 
         if neighbour_count == 0 {
@@ -89,33 +99,15 @@ impl World {
         let xspeed_avg = xspeed_cum / neighbour_count as f32;
         let yspeed_avg = yspeed_cum / neighbour_count as f32;
 
-        let mut new_speedx = (xpos_avg - boid.x) * self.ctx.centering_factor;
-        let mut new_speedy = (ypos_avg - boid.y) * self.ctx.centering_factor;
+        let mut new_speedx = sepx * self.ctx.avoid_factor;
+        let mut new_speedy = sepy * self.ctx.avoid_factor;
+
+        new_speedx += (xpos_avg - boid.x) * self.ctx.centering_factor;
+        new_speedy += (ypos_avg - boid.y) * self.ctx.centering_factor;
 
         new_speedx += (xspeed_avg - boid.speedx) * self.ctx.matching_factor;
         new_speedy += (yspeed_avg - boid.speedy) * self.ctx.matching_factor;
 
-        (new_speedx, new_speedy)
-    }
-
-    fn get_separation_speeds(&self, boid: &boid::Boid, dist: f32) -> (f32, f32) {
-        let (mut sepx, mut sepy) = (0.0, 0.0);
-
-        for b in self
-            .grid
-            .get_possible_neighbours(boid)
-            .map(|id| &self.boids[id.0])
-            .filter(|b| {
-                let bdist = b.get_distance_sqrd(boid);
-                bdist < dist * dist && bdist > 0.0
-            })
-        {
-            sepx += boid.x - b.x;
-            sepy += boid.y - b.y;
-        }
-
-        let new_speedx = sepx * self.ctx.avoid_factor;
-        let new_speedy = sepy * self.ctx.avoid_factor;
         (new_speedx, new_speedy)
     }
 
