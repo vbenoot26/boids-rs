@@ -20,12 +20,12 @@ impl Default for Context {
         Context {
             viewing_distance: 20.0,
             close_distance: 5.0,
-            width: 1000,
-            height: 1000,
+            width: 1920,
+            height: 1080,
             avoid_factor: 0.05,
             centering_factor: 0.0005,
             matching_factor: 0.05,
-            boid_amount: 16000,
+            boid_amount: 32000,
             min_speed: 5.0,
             max_speed: 10.0,
         }
