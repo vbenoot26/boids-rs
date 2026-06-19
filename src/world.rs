@@ -1,3 +1,6 @@
+use std::slice::Chunks;
+use std::thread::{available_parallelism, scope};
+
 use crate::boid::{self, Boid};
 use crate::grid::Grid;
 use crate::{context, grid};
@@ -29,14 +32,22 @@ impl World {
     pub fn step(&mut self) {
         self.grid.distribute(&self.boids);
 
-        let speeds: Vec<(f32, f32)> = self
-            .boids
-            .iter()
-            .map(|b| {
-                let (new_speed_x, new_speed_y) = self.calc_new_speeds(b);
-                self.clamp_speeds(b.speedx + new_speed_x, b.speedy + new_speed_y)
-            })
-            .collect();
+        let threads = match available_parallelism() {
+            Ok(thr) => thr.get(),
+            Err(_) => 1,
+        };
+
+        let ch_size = (self.boids.len() as f32 / threads as f32).ceil() as usize;
+
+        let mut speeds = vec![(0.0, 0.0); self.boids.len()];
+
+        scope(|s| {
+            for (b_ch, speeds_ch) in self.boids.chunks(ch_size).zip(speeds.chunks_mut(ch_size)) {
+                s.spawn(|| {
+                    self.calc_speeds(b_ch, speeds_ch);
+                });
+            }
+        });
 
         for (i, b) in self.boids.iter_mut().enumerate() {
             let (speedx, speedy) = speeds[i];
@@ -44,6 +55,13 @@ impl World {
 
             b.x = b.x.rem_euclid(self.width as f32);
             b.y = b.y.rem_euclid(self.height as f32);
+        }
+    }
+
+    fn calc_speeds(&self, b_ch: &[Boid], speeds_ch: &mut [(f32, f32)]) {
+        for (i, b) in b_ch.iter().enumerate() {
+            let (new_speed_x, new_speed_y) = self.calc_new_speeds(b);
+            speeds_ch[i] = self.clamp_speeds(b.speedx + new_speed_x, b.speedy + new_speed_y);
         }
     }
 

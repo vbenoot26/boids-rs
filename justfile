@@ -3,3 +3,6 @@ flamegraph *args:
 
 run: 
     cargo run --release
+
+bench:
+    cargo bench
