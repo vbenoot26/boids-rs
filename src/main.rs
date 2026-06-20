@@ -23,7 +23,7 @@ fn main() {
 
         let mut draw = rl.begin_texture_mode(&thread, &mut texture);
 
-        draw.clear_background(Color::BLACK);
+        draw.clear_background(Color::new(0, 0, 0, 128));
         world
             .boids
             .iter()
@@ -32,6 +32,7 @@ fn main() {
         drop(draw);
 
         let mut draw = rl.begin_drawing(&thread);
+        draw.draw_texture(&texture, 0, 0, Color::WHITE);
         draw.draw_text(&fps_text, 10, 10, 20, Color::WHITE);
     }
 }
