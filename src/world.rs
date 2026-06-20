@@ -32,7 +32,6 @@ impl World {
     pub fn step(&mut self, speeds: &mut Vec<(f32, f32)>) {
         self.grid.distribute(&self.boids);
         self.boids = self.grid.sort_by_location(&mut self.boids);
-        self.grid.distribute(&self.boids);
 
         let threads = match available_parallelism() {
             Ok(thr) => thr.get(),

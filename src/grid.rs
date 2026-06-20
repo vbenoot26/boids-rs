@@ -77,13 +77,17 @@ impl Grid {
         })
     }
 
-    pub fn sort_by_location(&self, boids: &mut Vec<Boid>) -> Vec<Boid> {
+    pub fn sort_by_location(&mut self, boids: &mut Vec<Boid>) -> Vec<Boid> {
         let mut result = Vec::with_capacity(boids.len());
+        let mut counter = 0;
 
-        for col in self.rectangles.iter() {
-            for rect in col.iter() {
-                for id in rect.boids.iter() {
-                    result.push(boids[id.0]);
+        for col in self.rectangles.iter_mut() {
+            for rect in col.iter_mut() {
+                for i in 0..rect.boids.len() {
+                    result.push(boids[rect.boids[i].0]);
+
+                    rect.boids[i] = BoidId(counter);
+                    counter += 1;
                 }
             }
         }
