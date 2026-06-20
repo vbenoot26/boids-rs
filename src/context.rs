@@ -25,7 +25,7 @@ impl Default for Context {
             avoid_factor: 0.05,
             centering_factor: 0.0005,
             matching_factor: 0.05,
-            boid_amount: 64000,
+            boid_amount: 128000,
             min_speed: 1.0,
             max_speed: 3.0,
         }

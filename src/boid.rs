@@ -1,6 +1,7 @@
 use crate::context::Context;
 use rand::RngExt;
 
+#[derive(Copy, Clone)]
 pub struct Boid {
     pub x: f32,
     pub y: f32,

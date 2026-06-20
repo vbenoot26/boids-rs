@@ -1,3 +1,5 @@
+use std::mem::take;
+
 use crate::{boid::Boid, context::Context, world::BoidId};
 
 struct Rectangle {
@@ -73,5 +75,19 @@ impl Grid {
         (col_min..=col_max).flat_map(move |c| {
             (row_min..=row_max).flat_map(move |r| self.rectangles[c][r].boids.iter().copied())
         })
+    }
+
+    pub fn sort_by_location(&self, boids: &mut Vec<Boid>) -> Vec<Boid> {
+        let mut result = Vec::with_capacity(boids.len());
+
+        for col in self.rectangles.iter() {
+            for rect in col.iter() {
+                for id in rect.boids.iter() {
+                    result.push(boids[id.0]);
+                }
+            }
+        }
+
+        result
     }
 }
