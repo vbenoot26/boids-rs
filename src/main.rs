@@ -16,8 +16,10 @@ fn main() {
 
     rl.set_target_fps(60);
 
+    let mut speeds = vec![(0.0, 0.0); ctx.boid_amount];
+
     while !rl.window_should_close() {
-        world.step();
+        world.step(&mut speeds);
 
         let fps_text = format!("FPS: {}", rl.get_fps());
 

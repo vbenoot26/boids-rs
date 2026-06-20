@@ -29,7 +29,7 @@ pub fn init(ctx: context::Context) -> World {
 }
 
 impl World {
-    pub fn step(&mut self) {
+    pub fn step(&mut self, speeds: &mut Vec<(f32, f32)>) {
         self.grid.distribute(&self.boids);
 
         let threads = match available_parallelism() {
@@ -38,8 +38,6 @@ impl World {
         };
 
         let ch_size = (self.boids.len() as f32 / threads as f32).ceil() as usize;
-
-        let mut speeds = vec![(0.0, 0.0); self.boids.len()];
 
         scope(|s| {
             for (b_ch, speeds_ch) in self.boids.chunks(ch_size).zip(speeds.chunks_mut(ch_size)) {
