@@ -37,7 +37,8 @@ fn main() {
             prev_end = Instant::now();
             world.step(&mut speeds, delta_t);
 
-            let res = boids_tx.send(world.boids.clone());
+            let locations: Vec<(f32, f32)> = world.boids.iter().map(|b| (b.x, b.y)).collect();
+            let res = boids_tx.send(locations);
             if let Err(_) = res {
                 break;
             }
@@ -57,7 +58,7 @@ fn main() {
         draw.clear_background(Color::new(0, 0, 0, 128));
         boids
             .iter()
-            .for_each(|b| draw.draw_pixel(b.x as i32, b.y as i32, Color::WHITE));
+            .for_each(|b| draw.draw_pixel(b.0 as i32, b.1 as i32, Color::WHITE));
 
         drop(draw);
 
