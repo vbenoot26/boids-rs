@@ -6,6 +6,10 @@ fn bench_step(c: &mut Criterion) {
 
     let mut world = boids::world::init(ctx);
 
+    for _ in 0..399 {
+        world.step(&mut speeds);
+    }
+
     c.bench_function("world_step", |b| {
         b.iter(|| world.step(&mut speeds));
     });
