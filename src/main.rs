@@ -1,3 +1,12 @@
+use std::{
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+        mpsc,
+    },
+    thread,
+};
+
 use boids::{context, world};
 use raylib::{
     drawing::RaylibTextureModeExt,
@@ -6,7 +15,6 @@ use raylib::{
 
 fn main() {
     let ctx = context::Context::default();
-    let mut world = world::init(ctx.clone(), &mut rand::rng());
 
     let (mut rl, thread) = raylib::init().size(ctx.width, ctx.height).build();
 
@@ -16,18 +24,36 @@ fn main() {
 
     rl.set_target_fps(60);
 
-    let mut speeds = vec![(0.0, 0.0); ctx.boid_amount];
+    let (boids_tx, boids_rx) = mpsc::channel();
 
-    while !rl.window_should_close() {
-        world.step(&mut speeds);
+    let stop = Arc::new(AtomicBool::new(false));
+    let stop_clone = stop.clone();
+
+    thread::spawn(move || {
+        let mut speeds = vec![(0.0, 0.0); ctx.boid_amount];
+        let mut world = world::init(ctx.clone(), &mut rand::rng());
+        while !stop_clone.load(Ordering::Relaxed) {
+            world.step(&mut speeds);
+
+            let res = boids_tx.send(world.boids.clone());
+            if let Err(_) = res {
+                break;
+            }
+        }
+    });
+
+    for boids in boids_rx {
+        if rl.window_should_close() {
+            stop.store(true, Ordering::Relaxed);
+            break;
+        }
 
         let fps_text = format!("FPS: {}", rl.get_fps());
 
         let mut draw = rl.begin_texture_mode(&thread, &mut texture);
 
         draw.clear_background(Color::new(0, 0, 0, 128));
-        world
-            .boids
+        boids
             .iter()
             .for_each(|b| draw.draw_pixel(b.x as i32, b.y as i32, Color::WHITE));
 
