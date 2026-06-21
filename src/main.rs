@@ -5,6 +5,7 @@ use std::{
         mpsc,
     },
     thread,
+    time::Instant,
 };
 
 use boids::{context, world};
@@ -22,9 +23,7 @@ fn main() {
         .load_render_texture(&thread, ctx.width as u32, ctx.height as u32)
         .unwrap();
 
-    rl.set_target_fps(60);
-
-    let (boids_tx, boids_rx) = mpsc::channel();
+    let (boids_tx, boids_rx) = mpsc::sync_channel(1);
 
     let stop = Arc::new(AtomicBool::new(false));
     let stop_clone = stop.clone();
@@ -32,8 +31,11 @@ fn main() {
     thread::spawn(move || {
         let mut speeds = vec![(0.0, 0.0); ctx.boid_amount];
         let mut world = world::init(ctx.clone(), &mut rand::rng());
+        let mut prev_end = Instant::now();
         while !stop_clone.load(Ordering::Relaxed) {
-            world.step(&mut speeds);
+            let delta_t = Instant::now().checked_duration_since(prev_end).unwrap();
+            prev_end = Instant::now();
+            world.step(&mut speeds, delta_t);
 
             let res = boids_tx.send(world.boids.clone());
             if let Err(_) = res {

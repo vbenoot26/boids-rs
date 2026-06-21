@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::context::Context;
 use rand::RngExt;
 
@@ -19,17 +21,26 @@ pub fn new<R: RngExt>(ctx: &Context, rng: &mut R) -> Boid {
     }
 }
 
+fn scale_to_duration(speedx: f32, speedy: f32, delta_t: Duration) -> (f32, f32) {
+    let second = Duration::from_millis(17);
+    let ratio = delta_t.as_nanos() as f32 / second.as_nanos() as f32;
+
+    return (speedx * ratio, speedy * ratio);
+}
+
 impl Boid {
     pub fn get_distance_sqrd(&self, other: &Boid) -> f32 {
         return ((self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y))
             as f32;
     }
 
-    pub fn step(&mut self, new_speed_x: f32, new_speed_y: f32) {
+    pub fn step(&mut self, new_speed_x: f32, new_speed_y: f32, delta_t: Duration) {
         self.speedx = new_speed_x;
         self.speedy = new_speed_y;
 
-        self.x += self.speedx;
-        self.y += self.speedy;
+        let (scaledx, scaledy) = scale_to_duration(self.speedx, self.speedy, delta_t);
+
+        self.x += scaledx;
+        self.y += scaledy;
     }
 }

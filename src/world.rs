@@ -1,4 +1,5 @@
 use std::thread::{available_parallelism, scope};
+use std::time::Duration;
 
 use rand::RngExt;
 
@@ -30,7 +31,7 @@ pub fn init<R: RngExt>(ctx: context::Context, rng: &mut R) -> World {
 }
 
 impl World {
-    pub fn step(&mut self, speeds: &mut Vec<(f32, f32)>) {
+    pub fn step(&mut self, speeds: &mut Vec<(f32, f32)>, delta_t: Duration) {
         self.grid.distribute(&self.boids);
         self.boids = self.grid.sort_by_location(&mut self.boids);
 
@@ -51,7 +52,7 @@ impl World {
 
         for (i, b) in self.boids.iter_mut().enumerate() {
             let (speedx, speedy) = speeds[i];
-            b.step(speedx, speedy);
+            b.step(speedx, speedy, delta_t);
 
             b.x = b.x.rem_euclid(self.width as f32);
             b.y = b.y.rem_euclid(self.height as f32);
