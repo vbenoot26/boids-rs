@@ -1,3 +1,5 @@
+use std::thread::available_parallelism;
+
 #[derive(Clone)]
 pub struct Context {
     pub viewing_distance: f32,
@@ -13,10 +15,16 @@ pub struct Context {
 
     pub min_speed: f32,
     pub max_speed: f32,
+
+    pub threads: usize,
 }
 
 impl Default for Context {
     fn default() -> Context {
+        let threads = match available_parallelism() {
+            Ok(thr) => thr.get(),
+            Err(_) => 1,
+        };
         Context {
             viewing_distance: 20.0,
             close_distance: 5.0,
@@ -28,6 +36,7 @@ impl Default for Context {
             boid_amount: 128000,
             min_speed: 1.0,
             max_speed: 3.0,
+            threads: threads,
         }
     }
 }

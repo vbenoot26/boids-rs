@@ -35,12 +35,7 @@ impl World {
         self.grid.distribute(&self.boids);
         self.boids = self.grid.sort_by_location(&mut self.boids);
 
-        let threads = match available_parallelism() {
-            Ok(thr) => thr.get(),
-            Err(_) => 1,
-        };
-
-        let ch_size = (self.boids.len() as f32 / threads as f32).ceil() as usize;
+        let ch_size = (self.boids.len() as f32 / self.ctx.threads as f32).ceil() as usize;
 
         scope(|s| {
             for (b_ch, speeds_ch) in self.boids.chunks(ch_size).zip(speeds.chunks_mut(ch_size)) {
