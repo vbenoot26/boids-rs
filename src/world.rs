@@ -1,5 +1,6 @@
-use std::slice::Chunks;
 use std::thread::{available_parallelism, scope};
+
+use rand::RngExt;
 
 use crate::boid::{self, Boid};
 use crate::grid::Grid;
@@ -16,8 +17,8 @@ pub struct World {
     ctx: context::Context,
 }
 
-pub fn init(ctx: context::Context) -> World {
-    let boids: Vec<Boid> = (0..ctx.boid_amount).map(|_| boid::new(&ctx)).collect();
+pub fn init<R: RngExt>(ctx: context::Context, rng: &mut R) -> World {
+    let boids: Vec<Boid> = (0..ctx.boid_amount).map(|_| boid::new(&ctx, rng)).collect();
 
     return World {
         boids: boids,

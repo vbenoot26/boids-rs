@@ -6,7 +6,7 @@ use raylib::{
 
 fn main() {
     let ctx = context::Context::default();
-    let mut world = world::init(ctx.clone());
+    let mut world = world::init(ctx.clone(), &mut rand::rng());
 
     let (mut rl, thread) = raylib::init().size(ctx.width, ctx.height).build();
 

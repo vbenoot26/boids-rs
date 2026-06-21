@@ -10,8 +10,7 @@ pub struct Boid {
     pub speedy: f32,
 }
 
-pub fn new(ctx: &Context) -> Boid {
-    let mut rng = rand::rng();
+pub fn new<R: RngExt>(ctx: &Context, rng: &mut R) -> Boid {
     Boid {
         x: rng.random::<f32>() * (ctx.width as f32),
         y: rng.random::<f32>() * (ctx.height as f32),
