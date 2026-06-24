@@ -58,7 +58,7 @@ fn main() {
         draw.clear_background(Color::new(0, 0, 0, 128));
         boids
             .iter()
-            .for_each(|b| draw.draw_pixel(b.0 as i32, b.1 as i32, Color::WHITE));
+            .for_each(|b| draw.draw_pixel(b.0 as i32, b.1 as i32, Color::new(20, 153, 17, 255)));
 
         drop(draw);
 
