@@ -15,9 +15,15 @@ use raylib::{
 };
 
 fn main() {
-    let ctx = context::Context::default();
+    let mut ctx = context::Context::default();
 
-    let (mut rl, thread) = raylib::init().size(ctx.width, ctx.height).build();
+    let (mut rl, thread) = raylib::init()
+        .size(ctx.width, ctx.height)
+        .fullscreen()
+        .build();
+
+    ctx.width = rl.get_screen_width();
+    ctx.height = rl.get_screen_height();
 
     let mut texture = rl
         .load_render_texture(&thread, ctx.width as u32, ctx.height as u32)
